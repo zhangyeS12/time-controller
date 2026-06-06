@@ -24,14 +24,23 @@ time-controller 面向 Windows 桌面用户，使用 C#、.NET 8、WPF 和 SQLit
 - 时间与时区设置
 - 本地隐私保护
 
-## 截图占位
+## 截图
 
-截图后续可放在 `docs/screenshots/` 目录中。
+### 仪表盘
 
-- 仪表盘截图：`docs/screenshots/dashboard.png`
-- 历史统计截图：`docs/screenshots/history.png`
-- 报告分析截图：`docs/screenshots/report.png`
-- 数据设置截图：`docs/screenshots/data-settings.png`
+![仪表盘](docs/screenshots/dashboard.png)
+
+### 历史统计
+
+![历史统计](docs/screenshots/history.png)
+
+### 报告分析
+
+![报告分析](docs/screenshots/report.png)
+
+### 数据设置
+
+![数据设置](docs/screenshots/settings.png)
 
 ## 安装方式
 
