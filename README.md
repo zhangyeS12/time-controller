@@ -33,15 +33,21 @@ time-controller 面向 Windows 桌面用户，使用 C#、.NET 8、WPF 和 SQLit
 - 报告分析截图：`docs/screenshots/report.png`
 - 数据设置截图：`docs/screenshots/data-settings.png`
 
-## 开发环境
+## 安装方式
 
-- Windows 10 / Windows 11
-- .NET 8 SDK
-- Visual Studio 2022 或支持 .NET 8 的编辑器
-- WPF
-- SQLite
+### 方式一：下载 Release 安装包
 
-## 如何运行
+进入 GitHub Releases 页面，下载最新版本安装包并运行。
+
+安装包会把程序安装到：
+
+```text
+%ProgramFiles%\time-controller\
+```
+
+用户数据仍然保存在 LocalAppData，不会写入安装目录。
+
+### 方式二：从源码运行
 
 在项目根目录执行：
 
@@ -51,25 +57,63 @@ dotnet build AppTimeTracker\AppTimeTracker.csproj
 dotnet run --project AppTimeTracker\AppTimeTracker.csproj
 ```
 
-## 如何发布
+### 方式三：自行发布
 
-Framework-dependent 版本适合已经安装 .NET Desktop Runtime 的用户：
+Framework-dependent 版本适合已经安装 .NET 8 Desktop Runtime 的用户：
 
 ```powershell
-dotnet publish AppTimeTracker\AppTimeTracker.csproj -c Release -r win-x64 --self-contained false
+.\scripts\publish-framework-dependent.ps1
 ```
 
 Self-contained 单文件版本适合没有安装 .NET 的用户，体积更大，但可直接运行：
 
 ```powershell
-dotnet publish AppTimeTracker\AppTimeTracker.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true
+.\scripts\publish-self-contained.ps1
 ```
 
-发布产物通常位于：
+发布产物会输出到：
 
 ```text
-AppTimeTracker\bin\Release\net8.0-windows\win-x64\publish\
+release\framework-dependent\
+release\self-contained\
 ```
+
+也可以直接执行 dotnet publish：
+
+```powershell
+dotnet publish AppTimeTracker\AppTimeTracker.csproj -c Release -r win-x64 --self-contained false -o release/framework-dependent
+dotnet publish AppTimeTracker\AppTimeTracker.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true -o release/self-contained
+```
+
+## 如何发布
+
+1. 运行 self-contained 发布脚本：
+
+```powershell
+.\scripts\publish-self-contained.ps1
+```
+
+2. 使用 Inno Setup 打开：
+
+```text
+installer\time-controller.iss
+```
+
+3. 编译安装包。
+
+安装包输出目录：
+
+```text
+installer\output\
+```
+
+## 开发环境
+
+- Windows 10 / Windows 11
+- .NET 8 SDK
+- Visual Studio 2022 或支持 .NET 8 的编辑器
+- WPF
+- SQLite
 
 ## 数据保存位置
 
@@ -110,7 +154,7 @@ AppTimeTracker\bin\Release\net8.0-windows\win-x64\publish\
 
 ## 当前限制
 
-- 第一版仅支持 Windows。
+- 目前仅支持 Windows。
 - 应用识别基于前台窗口和进程名。
 - 统计准确性会受到系统权限、进程访问权限和应用窗口行为影响。
 - 报告分析为本地规则型分析，不包含云端 AI 分析。

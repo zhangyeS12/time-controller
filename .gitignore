@@ -14,5 +14,11 @@ app_usage.db
 logs/
 backups/
 exports/
+release/
+installer/output/
+*.zip
+*.msi
+*.exe
+*.nupkg
 .codex/build-check*/
 build-check*/
