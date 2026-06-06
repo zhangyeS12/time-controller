@@ -4,8 +4,20 @@ namespace AppTimeTracker;
 
 public partial class App : System.Windows.Application
 {
+    private const string SingleInstanceMutexName = @"Global\time-controller-single-instance";
+    private Mutex? singleInstanceMutex;
+
     protected override void OnStartup(System.Windows.StartupEventArgs e)
     {
+        singleInstanceMutex = new Mutex(initiallyOwned: true, SingleInstanceMutexName, out var isFirstInstance);
+        if (!isFirstInstance)
+        {
+            singleInstanceMutex.Dispose();
+            singleInstanceMutex = null;
+            Shutdown();
+            return;
+        }
+
         AppPaths.EnsureDirectories();
         RegisterExceptionHandlers();
         LogService.Info("App started " + AppPaths.Version);
@@ -15,6 +27,9 @@ public partial class App : System.Windows.Application
     protected override void OnExit(System.Windows.ExitEventArgs e)
     {
         LogService.Info("App exited with code " + e.ApplicationExitCode);
+        singleInstanceMutex?.ReleaseMutex();
+        singleInstanceMutex?.Dispose();
+        singleInstanceMutex = null;
         base.OnExit(e);
     }
 
