@@ -184,6 +184,8 @@ public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
     public ObservableCollection<FocusRuleStatus> FocusRules { get; } = [];
     public ObservableCollection<FocusSession> RecentFocusSessions { get; } = [];
     public ObservableCollection<BackupInfo> Backups { get; } = [];
+    public ObservableCollection<BackupInfo> AutoBackupSlots { get; } = [];
+    public ObservableCollection<BackupInfo> ManualBackupSlots { get; } = [];
     public ObservableCollection<string> CategoryOptions { get; }
     public ObservableCollection<SelectOption> TimeZoneOptions { get; } =
     [
@@ -1159,7 +1161,10 @@ public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
     {
         try
         {
-            Replace(Backups, await backupService.GetBackupsAsync());
+            var backups = await backupService.GetBackupSlotsAsync();
+            Replace(Backups, backups);
+            Replace(AutoBackupSlots, backups.Where(item => item.SlotType == "auto"));
+            Replace(ManualBackupSlots, backups.Where(item => item.SlotType == "manual"));
         }
         catch (Exception ex)
         {
@@ -1175,18 +1180,9 @@ public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
             return;
         }
 
-        var today = timeZoneService.GetSelectedZoneDateString(DateTime.UtcNow);
-        var lastDate = databaseService.GetSetting("Backup.LastAutoBackupDate", "");
-        if (lastDate == today)
-        {
-            return;
-        }
-
         try
         {
-            await backupService.CreateBackupAsync("auto");
-            await backupService.CleanupOldBackupsAsync(MaxAutoBackups);
-            databaseService.SetSetting("Backup.LastAutoBackupDate", today);
+            await backupService.RunScheduledBackupsAsync();
             await RefreshBackupsAsync();
         }
         catch (Exception ex)
@@ -1204,8 +1200,7 @@ public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
 
         try
         {
-            await backupService.CreateBackupAsync("exit");
-            await backupService.CleanupOldBackupsAsync(MaxAutoBackups);
+            await backupService.SaveToSlotAsync("auto_latest");
         }
         catch (Exception ex)
         {
