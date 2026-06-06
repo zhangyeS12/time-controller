@@ -72,6 +72,22 @@ public sealed class TimeZoneService
         return TimeZoneInfo.ConvertTimeFromUtc(utc, GetCurrentTimeZone());
     }
 
+    public DateTime ConvertStoredTimeToDisplayTime(DateTime storedTime)
+    {
+        if (storedTime.Kind == DateTimeKind.Utc)
+        {
+            return ConvertUtcToDisplayTime(storedTime);
+        }
+
+        var localStoredTime = DateTime.SpecifyKind(storedTime, DateTimeKind.Unspecified);
+        return TimeZoneInfo.ConvertTime(localStoredTime, TimeZoneInfo.Local, GetCurrentTimeZone());
+    }
+
+    public string FormatDisplayTime(DateTime storedTime)
+    {
+        return ConvertStoredTimeToDisplayTime(storedTime).ToString("HH:mm");
+    }
+
     public DateTime ConvertDisplayTimeToUtc(DateTime displayTime)
     {
         return TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(displayTime, DateTimeKind.Unspecified), GetCurrentTimeZone());

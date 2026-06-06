@@ -679,6 +679,7 @@ public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
         CurrentDuration = TimeFormatter.Format(trackingService.CurrentDurationSeconds);
         StatusText = GetStatusText();
 
+        ApplyTimelineDisplayTimes(timeline);
         Replace(Ranking, orderedRanking);
         Replace(Timeline, timeline.Where(item => item.DurationSeconds >= 3).OrderByDescending(item => item.StartTime));
         RefreshTodayFocusSummaryAsync().GetAwaiter().GetResult();
@@ -1476,6 +1477,24 @@ public sealed class MainViewModel : INotifyPropertyChanged, IDisposable
                 DurationSeconds = live.DurationSeconds
             });
         }
+    }
+
+    private void ApplyTimelineDisplayTimes(IEnumerable<TimelineItem> timeline)
+    {
+        foreach (var item in timeline)
+        {
+            var start = timeZoneService.FormatDisplayTime(item.StartTime);
+            var end = item.EndTime is null
+                ? GetTimelineEndFallbackText(item)
+                : timeZoneService.FormatDisplayTime(item.EndTime.Value);
+            item.DisplayTimeRange = $"{start} - {end}";
+        }
+    }
+
+    private static string GetTimelineEndFallbackText(TimelineItem item)
+    {
+        var separatorIndex = item.TimeRange.IndexOf(" - ", StringComparison.Ordinal);
+        return separatorIndex >= 0 ? item.TimeRange[(separatorIndex + 3)..] : "";
     }
 
     private void AddLiveSessionToHistory(List<AppUsageStat> stats, DateTime? start, DateTime? end)
